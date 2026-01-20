@@ -14,8 +14,10 @@ import { IconCheck, IconFileUpload, IconInfoCircle } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import srtParser2 from "srt-parser-2";
 import { extractData } from "@/lib/extractSrtData";
+import { useSrtDataStore } from "@/zustand/geodata-zustand";
 
 const SrtImport = () => {
+  const { setSrtData } = useSrtDataStore();
   const [open, setOpen] = useState(false);
   const [filename, setFilename] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
@@ -29,9 +31,13 @@ const SrtImport = () => {
     const parser = new srtParser2();
     const dataArray = parser.fromSrt(rawData);
 
-    const geoDataArray = dataArray.map((entry) => extractData(entry.text));
-    console.log(geoDataArray);
+    const geoDataArray = dataArray.map((entry) => ({
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      ...extractData(entry.text),
+    }));
 
+    setSrtData(geoDataArray);
     setOpen(false);
   };
 

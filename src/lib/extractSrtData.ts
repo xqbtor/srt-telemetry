@@ -1,13 +1,6 @@
-interface ParsedData {
-  time?: string;
-  latitude?: number;
-  longitude?: number;
-  rel_alt?: number;
-  abs_alt?: number;
-  ct?: number;
-}
+import type { GeoData } from "@/types/data";
 
-export const extractData = (input: string): ParsedData => {
+export const extractData = (input: string): GeoData => {
   const timeMatch = input.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})/);
   const latMatch = input.match(/latitude:\s*([+-]?\d+(?:\.\d+)?)/);
   const lonMatch = input.match(/longitude:\s*([+-]?\d+(?:\.\d+)?)/);
