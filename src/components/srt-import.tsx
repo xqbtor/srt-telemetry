@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "./ui/input";
 import {
   Dialog,
@@ -12,21 +12,32 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { IconCheck, IconFileUpload, IconInfoCircle } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import srtParser2 from "srt-parser-2";
+import { extractData } from "@/lib/extractSrtData";
 
 const SrtImport = () => {
   const [open, setOpen] = useState(false);
   const [filename, setFilename] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement | null>(null);
 
-  const processSrtFile = (file: File) => {
-    setFilename(file.name);
-    console.log("Hallo", file.name);
+  const processSrtFile = async () => {
+    const file = fileInput.current?.files?.item(0);
+    if (!file) return;
+
+    const rawData = await file.text();
+
+    const parser = new srtParser2();
+    const dataArray = parser.fromSrt(rawData);
+
+    const geoDataArray = dataArray.map((entry) => extractData(entry.text));
+    console.log(geoDataArray);
+
+    setOpen(false);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      processSrtFile(file);
-    }
+    const file = event.target.files?.item(0);
+    if (file) setFilename(file.name);
   };
 
   return (
@@ -61,9 +72,7 @@ const SrtImport = () => {
               e.preventDefault();
               e.stopPropagation();
               const file = e.dataTransfer.files?.[0];
-              if (file) {
-                processSrtFile(file);
-              }
+              if (file) setFilename(file.name);
             }}
           >
             Click to select a file or drop it here.
@@ -73,6 +82,7 @@ const SrtImport = () => {
               type="file"
               accept=".srt"
               onChange={handleFileSelect}
+              ref={fileInput}
             />
           </label>
           {filename ? (
@@ -85,7 +95,9 @@ const SrtImport = () => {
             <DialogClose>
               <Button variant="destructive">cancel</Button>
             </DialogClose>
-            <Button>Process file</Button>
+            <Button disabled={!filename} onClick={processSrtFile}>
+              Process file
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
