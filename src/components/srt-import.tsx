@@ -17,9 +17,8 @@ import { extractData } from "@/lib/extractSrtData";
 import { useSrtDataStore } from "@/zustand/geodata-zustand";
 
 const SrtImport = () => {
-  const { setSrtData } = useSrtDataStore();
+  const { setSrtData, setFilename, filename } = useSrtDataStore();
   const [open, setOpen] = useState(false);
-  const [filename, setFilename] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
   const processSrtFile = async () => {
@@ -43,7 +42,7 @@ const SrtImport = () => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.item(0);
-    if (file) setFilename(file.name);
+    if (file) setFilename(file.name.split(".").slice(0, -1).join("."));
   };
 
   return (
@@ -93,7 +92,7 @@ const SrtImport = () => {
           </label>
           {filename ? (
             <div className="flex items-center gap-2 text-primary">
-              <IconCheck size={16} /> {filename} was imported
+              <IconCheck size={16} /> {filename}.srt was imported
             </div>
           ) : null}
 
